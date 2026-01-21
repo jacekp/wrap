@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Radio Player</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .player-container {
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .currently-playing {
+            margin-top: 20px;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="player-container">
+        <h2 class="text-center mb-4">Internet Radio Player</h2>
+        
+        <audio id="audio-player" controls class="w-100"></audio>
+
+        <div class="d-grid gap-2 mt-4">
+            <button class="btn btn-primary" onclick="playStation('https://stream.radio357.pl', 'Radio 357')">Radio 357</button>
+            <button class="btn btn-secondary" onclick="playStation('https://stream.nowyswiat.online/mp3', 'Radio Nowy Świat')">Radio Nowy Świat</button>
+        </div>
+
+        <hr class="my-4">
+
+        <div class="input-group mb-3">
+            <input type="text" id="custom-url" class="form-control" placeholder="Enter any stream URL">
+            <button class="btn btn-outline-success" type="button" onclick="playCustomStation()">Play</button>
+        </div>
+
+        <div id="currently-playing" class="text-center currently-playing">
+            Select a station to start
+        </div>
+    </div>
+
+    <script>
+        const audioPlayer = document.getElementById('audio-player');
+        const currentlyPlayingDiv = document.getElementById('currently-playing');
+        const customUrlInput = document.getElementById('custom-url');
+
+        let wasPaused = false;
+
+        function playStation(url, name) {
+            wasPaused = false; // It's a new station, not a resumed pause.
+            audioPlayer.src = url;
+            audioPlayer.play();
+            currentlyPlayingDiv.textContent = 'Playing: ' + name;
+        }
+
+        function playCustomStation() {
+            const url = customUrlInput.value.trim();
+            if (url) {
+                playStation(url, 'Custom Stream');
+                customUrlInput.value = '';
+            } else {
+                alert('Please enter a URL.');
+            }
+        }
+
+        audioPlayer.addEventListener('pause', () => {
+            // When the player is paused by any means, set the flag.
+            wasPaused = true;
+        });
+
+        audioPlayer.addEventListener('play', () => {
+            // When the player starts playing...
+            if (wasPaused) {
+                // ...and it was just paused, it means the user is resuming.
+                wasPaused = false; // Reset the flag
+                
+                // To get the live stream, we use the load() method to re-buffer the source.
+                audioPlayer.load();
+                audioPlayer.play(); // We need to call play() again after load().
+            }
+        });
+    </script>
+</body>
+</html>
